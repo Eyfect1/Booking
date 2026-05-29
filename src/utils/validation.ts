@@ -15,17 +15,23 @@ export function validatePhone(value: string): string | null {
   return "Введите корректный номер: +7XXXXXXXXXX или 8XXXXXXXXXX";
 }
 
+/** Сегодняшняя дата без времени — для сравнения с полем type="date". */
 function getTodayDateOnly(): Date {
   const now = new Date();
   return new Date(now.getFullYear(), now.getMonth(), now.getDate());
 }
 
+/**
+ * Парсит строку YYYY-MM-DD в локальной timezone.
+ * toISOString() здесь не используем — иначе дата может «съехать» на день.
+ */
 function parseDateOnly(value: string): Date | null {
   const [year, month, day] = value.split("-").map(Number);
   if (!year || !month || !day) {
     return null;
   }
   const parsed = new Date(year, month - 1, day);
+  // Отсекаем невалидные даты вроде 2026-02-31
   if (
     parsed.getFullYear() !== year ||
     parsed.getMonth() !== month - 1 ||
@@ -36,6 +42,7 @@ function parseDateOnly(value: string): Date | null {
   return parsed;
 }
 
+/** Формат для атрибутов min/max у input[type="date"]. */
 function formatDateOnly(date: Date): string {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -43,6 +50,7 @@ function formatDateOnly(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
+// 12:00, 13:00, … 22:00 — 11 слотов по ТЗ
 export const TIME_SLOTS = Array.from({ length: 11 }, (_, index) => {
   const hour = 12 + index;
   return `${String(hour).padStart(2, "0")}:00`;
@@ -59,6 +67,7 @@ export function getMinBookingDateString(): string {
   return formatDateOnly(getTodayDateOnly());
 }
 
+// Единая схема: используется в react-hook-form и в unit-тестах
 export const bookingSchema = z.object({
   name: z
     .string()

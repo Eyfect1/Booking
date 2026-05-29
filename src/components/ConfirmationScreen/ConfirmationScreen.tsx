@@ -9,6 +9,7 @@ interface ConfirmationScreenProps {
 
 export function ConfirmationScreen({ booking, onReset }: ConfirmationScreenProps) {
   return (
+    // aria-live — скринридер озвучит смену экрана после успешной отправки
     <section className={styles.card} aria-live="polite">
       <div className={styles.icon}>✓</div>
       <h2 className={styles.title}>Бронирование подтверждено</h2>

@@ -23,6 +23,7 @@ export function BookingForm({ onSubmit, isLoading }: BookingFormProps) {
     formState: { errors },
   } = useForm<BookingFormData>({
     resolver: zodResolver(bookingSchema),
+    // По ТЗ: ошибки при потере фокуса и при отправке
     mode: "onBlur",
     reValidateMode: "onBlur",
     defaultValues: {
@@ -35,6 +36,7 @@ export function BookingForm({ onSubmit, isLoading }: BookingFormProps) {
   });
 
   return (
+    // noValidate — отключаем браузерную валидацию, показываем только свои сообщения
     <form className={styles.form} onSubmit={handleSubmit(onSubmit)} noValidate>
       <h1 className={styles.title}>Онлайн-бронирование</h1>
       <p className={styles.subtitle}>Оставьте детали, и мы забронируем столик для вас.</p>
@@ -98,6 +100,7 @@ export function BookingForm({ onSubmit, isLoading }: BookingFormProps) {
           type="number"
           min={1}
           max={12}
+          // valueAsNumber — Zod ожидает number, а не строку из input
           {...register("guests", { valueAsNumber: true })}
           className={errors.guests ? styles.errorInput : ""}
         />

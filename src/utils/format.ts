@@ -1,4 +1,4 @@
-/** Formats YYYY-MM-DD for display in Russian locale. */
+/** Преобразует YYYY-MM-DD в читаемый вид для экрана подтверждения (ru-RU). */
 export function formatBookingDate(isoDate: string): string {
   const [year, month, day] = isoDate.split("-").map(Number);
   if (!year || !month || !day) {

@@ -1,36 +1,229 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Saveur Booking — онлайн-бронирование столика
 
-## Getting Started
+Тестовое задание для позиции **Junior Frontend Developer** (SAVEUR): одностраничное приложение для бронирования столика в ресторане с формой, валидацией, экраном подтверждения и адаптивной вёрсткой.
 
-First, run the development server:
+## Ссылки
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+|                  | URL                                   |
+| ---------------- | ------------------------------------- |
+| **Репозиторий**  | _добавьте ссылку на GitHub_           |
+| **Live preview** | _добавьте ссылку на Vercel / Netlify_ |
+
+---
+
+## Стек
+
+| Технология                                                       | Версия / назначение                     |
+| ---------------------------------------------------------------- | --------------------------------------- |
+| [Next.js](https://nextjs.org/) (App Router)                      | 16.x — каркас приложения                |
+| [React](https://react.dev/)                                      | 19.x — UI                               |
+| [TypeScript](https://www.typescriptlang.org/)                    | strict — типизация                      |
+| [SCSS Modules](https://sass-lang.com/)                           | стили компонентов                       |
+| [react-hook-form](https://react-hook-form.com/)                  | управление формой                       |
+| [Zod](https://zod.dev/)                                          | схема и правила валидации               |
+| [Framer Motion](https://www.framer.com/motion/)                  | анимация перехода форма → подтверждение |
+| [ESLint](https://eslint.org/) + [Prettier](https://prettier.io/) | линтинг и форматирование                |
+| [Vitest](https://vitest.dev/)                                    | unit-тесты логики валидации             |
+
+Бэкенд, база данных и авторизация **не используются** — отправка формы имитируется на клиенте.
+
+---
+
+## Реализованный функционал
+
+### Форма бронирования
+
+- Имя гостя, телефон, дата, время, количество гостей (1–12)
+- Все поля обязательны
+- Время — только слоты с шагом 1 час: `12:00` … `22:00`
+
+### Валидация
+
+| Поле    | Правила                                                       |
+| ------- | ------------------------------------------------------------- |
+| Имя     | минимум 2 символа; буквы (латиница/кириллица), пробел, дефис  |
+| Телефон | `+7` или `8` + 10 цифр; скобки и дефисы при вводе допускаются |
+| Дата    | не раньше сегодня, не позже чем через 90 дней                 |
+| Время   | только из списка слотов                                       |
+| Гости   | целое число от 1 до 12                                        |
+
+Ошибки показываются **под полем** (не через `alert`), при **потере фокуса** (`onBlur`) и при **отправке** формы.
+
+### Отправка и подтверждение
+
+- Имитация запроса: `setTimeout` 1.5 с
+- Кнопка блокируется, текст «Бронирую...» и спиннер
+- Экран подтверждения: имя, дата (в читаемом формате), время, количество гостей
+- Кнопка «Забронировать ещё» возвращает к форме
+
+### Адаптивность
+
+Вёрстка проверялась для ширины **375px** (мобильный) и **1280px** (десктоп).
+
+### Дизайн (по ТЗ)
+
+- Фон: `#FAFAF8`, акцент: `#C8963E`, текст: `#1A1A1A`
+- Ошибки: красный текст и обводка поля
+- Экран подтверждения: иконка, сводка, кнопка сброса
+
+---
+
+## Структура проекта
+
+```text
+src/
+├── app/
+│   ├── layout.tsx          # корневой layout, метаданные
+│   ├── page.tsx            # страница: состояние формы / успеха
+│   ├── page.module.scss    # layout страницы, брейкпоинты 375 / 1280
+│   └── globals.css         # базовые глобальные стили
+├── components/
+│   ├── BookingForm/        # форма + SCSS
+│   └── ConfirmationScreen/ # экран успеха + SCSS
+├── types/
+│   └── booking.ts          # BookingStatus, реэкспорт BookingFormData
+└── utils/
+    ├── validation.ts       # Zod-схема, validatePhone, слоты времени
+    ├── validation.test.ts  # unit-тесты валидации
+    ├── format.ts           # форматирование даты для UI
+    └── format.test.ts
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+**Поток данных:**
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```text
+page.tsx (статус idle | loading | success)
+    │
+    ├─► BookingForm ──onSubmit──► имитация API (1.5 с)
+    │
+    └─► ConfirmationScreen ──onReset──► снова форма
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## Запуск локально
 
-To learn more about Next.js, take a look at the following resources:
+### Требования
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Node.js** `>= 20.19` (рекомендуется LTS 22.x или 24.x)
+- **npm** 9+
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Проверка:
 
-## Deploy on Vercel
+```bash
+node -v
+npm -v
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Установка и dev-сервер
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+git clone <url-репозитория>
+cd saveur-booking
+npm install
+npm run dev
+```
+
+Откройте [http://localhost:3000](http://localhost:3000).
+
+### Сборка production
+
+```bash
+npm run build
+npm run start
+```
+
+---
+
+## NPM-скрипты
+
+| Команда                | Описание                           |
+| ---------------------- | ---------------------------------- |
+| `npm run dev`          | dev-сервер Next.js                 |
+| `npm run build`        | production-сборка                  |
+| `npm run start`        | запуск собранного приложения       |
+| `npm run lint`         | проверка ESLint                    |
+| `npm run lint:fix`     | ESLint с автоисправлением          |
+| `npm run format`       | форматирование Prettier            |
+| `npm run format:check` | проверка форматирования без записи |
+| `npm run test`         | unit-тесты (один прогон)           |
+| `npm run test:watch`   | тесты в watch-режиме               |
+
+---
+
+## Тестирование
+
+Покрыты unit-тестами:
+
+- `validatePhone` / `normalizePhone`
+- слоты времени `TIME_SLOTS`
+- схема `bookingSchema` (граничные случаи: пустые поля, даты, гости)
+- форматирование даты для экрана подтверждения
+
+```bash
+npm run test
+```
+
+---
+
+## Архитектурные решения
+
+1. **App Router + одна client-страница (`page.tsx`)** — вся логика переключения «форма / загрузка / успех» в одном месте; дочерние компоненты получают только нужные props.
+
+2. **Zod как единый источник правил** — схема `bookingSchema` используется и в форме (`zodResolver`), и в тестах; тип `BookingFormData` выводится через `z.infer`, без дублирования интерфейсов.
+
+3. **react-hook-form** — минимум ререндеров, встроенная поддержка `onBlur` и submit-валидации, как требует ТЗ.
+
+4. **Валидация вынесена в `utils/validation.ts`** — UI-компоненты не содержат бизнес-правил; проще тестировать и менять правила.
+
+5. **Даты без `toISOString()` для min/max** — парсинг `YYYY-MM-DD` в локальной timezone, чтобы избежать сдвига даты на день у пользователей вне UTC.
+
+6. **Framer Motion + `AnimatePresence mode="wait"`** — плавная смена экранов без одновременного монтирования формы и подтверждения.
+
+---
+
+## Что можно улучшить при наличии времени
+
+- Маска ввода телефона и автоподстановка `+7`
+- Сброс полей формы через `reset()` при «Забронировать ещё» (сейчас форма перемонтируется за счёт смены `key` в `AnimatePresence`)
+- E2E-тесты (Playwright) сценария «заполнить → отправить → увидеть подтверждение»
+- i18n, если понадобится несколько языков
+- Storybook для изолированной разработки UI-компонентов
+
+---
+
+## Деплой
+
+### GitHub
+
+```bash
+git add .
+git commit -m "feat: booking page for SAVEUR test task"
+git push -u origin main
+```
+
+### Vercel (рекомендуется для Next.js)
+
+1. [vercel.com](https://vercel.com) → вход через GitHub
+2. **Add New Project** → выбрать репозиторий
+3. Framework: **Next.js** (определяется автоматически)
+4. **Deploy**
+
+Альтернатива: [Netlify](https://www.netlify.com/) с тем же подключением репозитория.
+
+---
+
+## Возможные проблемы при запуске
+
+| Симптом                                     | Решение                                                                                              |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `SyntaxError: Unexpected end of JSON input` | Остановить `npm run dev`, удалить `.next`, выполнить `npm install`, запустить снова                  |
+| `eslint` / `next` not recognized            | Выполнить `npm install` в корне проекта                                                              |
+| Предупреждение про SWC / lockfile           | `npm install` после `npm run build`                                                                  |
+| Next выбирает неверный корень workspace     | Убедиться, что на диске `D:\` нет лишнего `yarn.lock`, или запускать команды только из папки проекта |
+
+---
+
+## Лицензия
+
+Проект создан в рамках тестового задания. Использование — по усмотрению автора.
