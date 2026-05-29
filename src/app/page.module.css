@@ -1,0 +1,19 @@
+.main {
+  min-height: 100vh;
+  padding: 24px 16px;
+  background: #fafaf8;
+}
+
+.container {
+  margin: 0 auto;
+  width: min(100%, 980px);
+  min-height: calc(100vh - 48px);
+  display: grid;
+  place-items: center;
+}
+
+@media (min-width: 1280px) {
+  .main {
+    padding-inline: 24px;
+  }
+}
