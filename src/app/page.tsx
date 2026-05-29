@@ -5,7 +5,7 @@ import { useState } from "react";
 import { BookingForm } from "@/components/BookingForm/BookingForm";
 import { ConfirmationScreen } from "@/components/ConfirmationScreen/ConfirmationScreen";
 import type { BookingFormData, BookingStatus } from "@/types/booking";
-import styles from "./page.module.css";
+import styles from "./page.module.scss";
 
 const transitionProps = {
   initial: { opacity: 0, y: 8 },

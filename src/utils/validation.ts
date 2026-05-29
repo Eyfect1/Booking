@@ -2,8 +2,17 @@ import { z } from "zod";
 
 const NAME_REGEX = /^[A-Za-zА-Яа-яЁё\s-]+$/;
 
-function normalizePhone(value: string): string {
+export function normalizePhone(value: string): string {
   return value.replace(/\D/g, "");
+}
+
+/** Validates Russian phone: +7 or 8 + 10 digits (per test task spec). */
+export function validatePhone(value: string): string | null {
+  const digits = normalizePhone(value);
+  if (digits.length === 11 && (digits.startsWith("7") || digits.startsWith("8"))) {
+    return null;
+  }
+  return "Введите корректный номер: +7XXXXXXXXXX или 8XXXXXXXXXX";
 }
 
 function getTodayDateOnly(): Date {
@@ -12,11 +21,26 @@ function getTodayDateOnly(): Date {
 }
 
 function parseDateOnly(value: string): Date | null {
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) {
+  const [year, month, day] = value.split("-").map(Number);
+  if (!year || !month || !day) {
     return null;
   }
-  return new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
+  const parsed = new Date(year, month - 1, day);
+  if (
+    parsed.getFullYear() !== year ||
+    parsed.getMonth() !== month - 1 ||
+    parsed.getDate() !== day
+  ) {
+    return null;
+  }
+  return parsed;
+}
+
+function formatDateOnly(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
 export const TIME_SLOTS = Array.from({ length: 11 }, (_, index) => {
@@ -28,36 +52,49 @@ export function getMaxBookingDateString(): string {
   const today = getTodayDateOnly();
   const maxDate = new Date(today);
   maxDate.setDate(maxDate.getDate() + 90);
-  return maxDate.toISOString().split("T")[0];
+  return formatDateOnly(maxDate);
 }
 
 export function getMinBookingDateString(): string {
-  return getTodayDateOnly().toISOString().split("T")[0];
+  return formatDateOnly(getTodayDateOnly());
 }
 
 export const bookingSchema = z.object({
   name: z
     .string()
     .trim()
+    .min(1, "Укажите имя гостя")
     .min(2, "Имя должно содержать минимум 2 символа")
     .regex(NAME_REGEX, "Допустимы только буквы, пробелы и дефис"),
-  phone: z.string().trim().refine((value) => {
-    const digits = normalizePhone(value);
-    return digits.length === 11 && (digits.startsWith("7") || digits.startsWith("8"));
-  }, "Введите корректный номер: +7XXXXXXXXXX или 8XXXXXXXXXX"),
-  date: z.string().refine((value) => {
-    const selectedDate = parseDateOnly(value);
-    if (!selectedDate) {
-      return false;
-    }
+  phone: z
+    .string()
+    .trim()
+    .min(1, "Укажите номер телефона")
+    .superRefine((value, ctx) => {
+      const error = validatePhone(value);
+      if (error) {
+        ctx.addIssue({ code: "custom", message: error });
+      }
+    }),
+  date: z
+    .string()
+    .min(1, "Укажите дату")
+    .refine((value) => {
+      const selectedDate = parseDateOnly(value);
+      if (!selectedDate) {
+        return false;
+      }
 
-    const minDate = getTodayDateOnly();
-    const maxDate = new Date(minDate);
-    maxDate.setDate(maxDate.getDate() + 90);
+      const minDate = getTodayDateOnly();
+      const maxDate = new Date(minDate);
+      maxDate.setDate(maxDate.getDate() + 90);
 
-    return selectedDate >= minDate && selectedDate <= maxDate;
-  }, "Дата должна быть в диапазоне от сегодня до +90 дней"),
-  time: z.string().refine((value) => TIME_SLOTS.includes(value), "Выберите время из доступных слотов"),
+      return selectedDate >= minDate && selectedDate <= maxDate;
+    }, "Дата должна быть в диапазоне от сегодня до +90 дней"),
+  time: z
+    .string()
+    .min(1, "Выберите время")
+    .refine((value) => TIME_SLOTS.includes(value), "Выберите время из доступных слотов"),
   guests: z
     .number({ message: "Введите количество гостей" })
     .int("Количество гостей должно быть целым числом")
@@ -65,4 +102,4 @@ export const bookingSchema = z.object({
     .max(12, "Максимум 12 гостей"),
 });
 
-export type BookingSchema = z.infer<typeof bookingSchema>;
+export type BookingFormData = z.infer<typeof bookingSchema>;

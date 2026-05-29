@@ -8,7 +8,6 @@ import {
   getMaxBookingDateString,
   getMinBookingDateString,
   TIME_SLOTS,
-  type BookingSchema,
 } from "@/utils/validation";
 import styles from "./BookingForm.module.scss";
 
@@ -22,7 +21,7 @@ export function BookingForm({ onSubmit, isLoading }: BookingFormProps) {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<BookingSchema>({
+  } = useForm<BookingFormData>({
     resolver: zodResolver(bookingSchema),
     mode: "onBlur",
     reValidateMode: "onBlur",
@@ -42,13 +41,25 @@ export function BookingForm({ onSubmit, isLoading }: BookingFormProps) {
 
       <div className={styles.field}>
         <label htmlFor="name">Имя гостя</label>
-        <input id="name" type="text" placeholder="Например, Анна" {...register("name")} className={errors.name ? styles.errorInput : ""} />
+        <input
+          id="name"
+          type="text"
+          placeholder="Например, Анна"
+          {...register("name")}
+          className={errors.name ? styles.errorInput : ""}
+        />
         {errors.name && <p className={styles.errorText}>{errors.name.message}</p>}
       </div>
 
       <div className={styles.field}>
         <label htmlFor="phone">Телефон</label>
-        <input id="phone" type="tel" placeholder="+7 (999) 123-45-67" {...register("phone")} className={errors.phone ? styles.errorInput : ""} />
+        <input
+          id="phone"
+          type="tel"
+          placeholder="+7 (999) 123-45-67"
+          {...register("phone")}
+          className={errors.phone ? styles.errorInput : ""}
+        />
         {errors.phone && <p className={styles.errorText}>{errors.phone.message}</p>}
       </div>
 

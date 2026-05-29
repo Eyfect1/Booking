@@ -1,9 +1,3 @@
-export interface BookingFormData {
-  name: string;
-  phone: string;
-  date: string;
-  time: string;
-  guests: number;
-}
+export type { BookingFormData } from "@/utils/validation";
 
 export type BookingStatus = "idle" | "loading" | "success";

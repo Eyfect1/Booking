@@ -1,4 +1,5 @@
 import type { BookingFormData } from "@/types/booking";
+import { formatBookingDate } from "@/utils/format";
 import styles from "./ConfirmationScreen.module.scss";
 
 interface ConfirmationScreenProps {
@@ -20,7 +21,7 @@ export function ConfirmationScreen({ booking, onReset }: ConfirmationScreenProps
         </div>
         <div>
           <dt>Дата</dt>
-          <dd>{booking.date}</dd>
+          <dd>{formatBookingDate(booking.date)}</dd>
         </div>
         <div>
           <dt>Время</dt>
@@ -33,7 +34,7 @@ export function ConfirmationScreen({ booking, onReset }: ConfirmationScreenProps
       </dl>
 
       <button type="button" className={styles.resetButton} onClick={onReset}>
-        Забронировать еще
+        Забронировать ещё
       </button>
     </section>
   );
